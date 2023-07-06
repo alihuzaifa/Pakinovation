@@ -1,11 +1,10 @@
-import { StyleSheet, View } from 'react-native'
+import { View } from 'react-native'
 import Icon from 'react-native-vector-icons/dist/AntDesign';
 import History from 'react-native-vector-icons/FontAwesome';
 import React, { useEffect, useState } from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from './Home';
 import User from './User';
-import About from './About';
 import Item from './Item';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -86,33 +85,6 @@ const BottomTabNavigator = () => {
                     );
                 },
             }} />
-            {
-                showOrderScreenCount > 0 && <Tab.Screen name="About" component={About} options={{
-                    tabBarLabel: '',
-                    tabBarIcon: tabInfo => {
-                        return tabInfo.focused ? (
-                            <View
-                                style={{
-                                    height: 50,
-                                    width: 50,
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    backgroundColor: 'white',
-                                    borderColor: 'blue',
-                                    borderWidth: 2,
-                                    borderRadius: 30,
-                                    top: -8,
-                                    elevation: 5,
-                                }}>
-                                <Icon name="shoppingcart" color={'blue'} size={28} />
-                            </View>
-                        ) : (
-                            <Icon name="shoppingcart" size={28} color={'blue'} />
-                        );
-                    },
-                }} />
-            }
-
             <Tab.Screen name="Items" component={Item} options={{
                 tabBarLabel: '',
                 tabBarIcon: tabInfo => {
@@ -142,5 +114,3 @@ const BottomTabNavigator = () => {
 }
 
 export default BottomTabNavigator
-
-const styles = StyleSheet.create({})
