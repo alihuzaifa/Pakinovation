@@ -135,7 +135,7 @@ const DetailsScreen = ({ navigation, route }) => {
                     style={{
                         justifyContent: 'center',
                         alignItems: 'center',
-                        height: 280,
+                        height: responsiveHeight(30),
                     }}>
                     <Text
                         style={{ fontSize: responsiveFontSize(5), fontFamily: "Poppins-Bold" }}>
@@ -143,7 +143,7 @@ const DetailsScreen = ({ navigation, route }) => {
                     </Text>
                     {/* <Image source={{ uri: item.image }} style={{ height: 220, width: 220 }} /> */}
                 </View>
-                <View style={[style.details, { height: responsiveHeight(55) }]}>
+                <View style={[style.details, { height: responsiveHeight(60) }]}>
                     <View
                         style={{
                             flexDirection: 'row',
@@ -277,10 +277,10 @@ const DetailsScreen = ({ navigation, route }) => {
                     </View>
                 </View>
                 <TouchableOpacity activeOpacity={0.8} style={{ justifyContent: "center", alignItems: "center" }}>
-                    <TouchableOpacity style={{ ...style.btnContainer, backgroundColor: 'blue' }} disabled={load}>
-                        <Text style={{ ...style.title, color: '#fff' }} onPress={() => {
-                            storeData(item)
-                        }}>{load ? <ActivityIndicator size="large" color="#fff" /> : 'Add To Cart'}</Text>
+                    <TouchableOpacity style={{ ...style.btnContainer, backgroundColor: 'blue' }} onPress={() => {
+                        storeData(item)
+                    }} disabled={load}>
+                        <Text style={{ ...style.title, color: '#fff' }} >{load ? <ActivityIndicator size="large" color="#fff" /> : 'Add To Cart'}</Text>
                     </TouchableOpacity>
                 </TouchableOpacity>
             </ScrollView>
@@ -301,9 +301,9 @@ const style = StyleSheet.create({
         backgroundColor: '#90EE90',
         borderTopRightRadius: responsiveWidth(10),
         borderTopLeftRadius: responsiveWidth(10),
-        
+
     },
-   
+
     title: {
         color: '#fff', fontFamily: 'Poppins-SemiBold', fontSize: responsiveFontSize(2)
     },
@@ -314,7 +314,7 @@ const style = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         position: "absolute",
-        bottom: responsiveHeight(5),
+        bottom: responsiveHeight(10),
         width: responsiveWidth(93)
     },
     btn: {
@@ -323,7 +323,7 @@ const style = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: responsiveWidth(4),
-        paddingVertical:responsiveHeight(1.3)
+        paddingVertical: responsiveHeight(1.3)
 
     },
 });

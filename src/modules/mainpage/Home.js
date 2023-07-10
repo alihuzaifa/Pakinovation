@@ -5,14 +5,13 @@ import {
     responsiveWidth,
     responsiveFontSize
 } from "react-native-responsive-dimensions";
-// import Header from '../../components/Header';
 import * as Animatable from 'react-native-animatable';
 import Icon from 'react-native-vector-icons/AntDesign';
 import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getApiMethod, postApiMethod } from '../../features/Api';
 
-const Home = ({ navigation }) => {
+const Home = ({ }) => {
     const [load, setLoad] = useState(false)
     const [isNetConnect, setIsNetConnect] = useState(false)
     const [showOrderScreenCount, setshowOrderScreenCount] = useState(0)
@@ -20,43 +19,6 @@ const Home = ({ navigation }) => {
     const [pendingOrder, setPendingOrder] = useState([{ Barcode: "", "Category": "8", "Company_Code": "1", "Description": "", "Discount": "0", "Manufactor": "", "PCode": "111", "ProdID": "2", "name": "SALAZODINE EC TAB 10S ", "price": "92.51" },
     { Barcode: "", "Category": "8", "Company_Code": "1", "Description": "", "Discount": "0", "Manufactor": "", "PCode": "111", "ProdID": "2", "name": "SALAZODINE EC TAB 10S ", "price": "92.51" }, { Barcode: "", "Category": "8", "Company_Code": "1", "Description": "", "Discount": "0", "Manufactor": "", "PCode": "111", "ProdID": "2", "name": "SALAZODINE EC TAB 10S ", "price": "92.51" }, { Barcode: "", "Category": "8", "Company_Code": "1", "Description": "", "Discount": "0", "Manufactor": "", "PCode": "111", "ProdID": "2", "name": "SALAZODINE EC TAB 10S ", "price": "92.51" }])
 
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         const state = await NetInfo.fetch();
-    //         setIsNetConnect(state.isConnected);
-    //         if (state.isConnected) {
-    //             try {
-    //                 setLoad(true);
-    //                 const token = await AsyncStorage.getItem('token');
-    //                 const [getList] = await Promise.all([getApiMethod('dealcust.php', JSON.parse(token))]);
-    //                 const updatedArray = getList?.data?.data?.map((item) => {
-    //                     const { "DealCustID ": dealCustID, ...rest } = item;
-    //                     return { "DealCustID": dealCustID, ...rest };
-    //                 });
-    //                 const shopList = updatedArray?.map((item) => {
-    //                     return {
-    //                         ...item,
-    //                         name: item?.name,
-    //                         address: item?.address,
-    //                     };
-    //                 });
-    //                 const arrayString = JSON.stringify(shopList);
-    //                 console.log("🚀 arrayString:", arrayString[0])
-    //                 await AsyncStorage.setItem('shopList', arrayString);
-    //                 setLoad(false);
-    //             } catch (error) {
-    //                 console.log('error', error);
-    //                 setLoad(false);
-    //             }
-    //         }
-    //     };
-
-    //     fetchData();
-    //     const unsubscribe = NetInfo.addEventListener(fetchData);
-    //     return () => {
-    //         unsubscribe();
-    //     };
-    // }, []);
 
     const getAllAppData = async () => {
         const state = await NetInfo.fetch();
@@ -102,7 +64,6 @@ const Home = ({ navigation }) => {
             }
         }
     };
-
     const confirmOrder = async () => {
         setLoad(true)
         try {
@@ -127,7 +88,6 @@ const Home = ({ navigation }) => {
                         const postData = await postApiMethod('orders.php', obj, headers)
                         await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
                         await AsyncStorage.setItem('DealCustID', '')
-                        navigation.navigate('User')
                         setshowOrderScreenCount(0)
                     }
                     setLoad(false)
@@ -140,8 +100,6 @@ const Home = ({ navigation }) => {
         }
         setLoad(false)
     }
-
-
     const CartCard = ({ item, index }) => {
         return (
             <>
@@ -195,13 +153,10 @@ const Home = ({ navigation }) => {
 
         }
     }
-
     useEffect(() => {
         CheckPostData()
     })
-
     return (
-
         <>
             {
                 load ? <SafeAreaView style={{
@@ -276,8 +231,6 @@ const Home = ({ navigation }) => {
                     </SafeAreaView>
             }
         </>
-
-
     )
 }
 export default Home
