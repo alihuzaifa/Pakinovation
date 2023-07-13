@@ -7,7 +7,7 @@ const getApiMethod = async (url, token) => {
     try {
         const res = await service.get(url, {
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWlucyAiLCJ1c2VyX2lkIjpudWxsLCJleHAiOjE2ODk4NzE0MzV9.s3uXpViqKCW2VABRLcjEjm8rc4B7sAUz5cLx549IgcM`,
             },
         });
         return res;

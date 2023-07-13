@@ -10,11 +10,13 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getApiMethod, postApiMethod } from '../../features/Api';
+import { useSelector } from 'react-redux';
 
 const Home = ({ }) => {
     const [load, setLoad] = useState(false)
     const [isNetConnect, setIsNetConnect] = useState(false)
     const [showOrderScreenCount, setshowOrderScreenCount] = useState(0)
+    const isLoad = useSelector(state => state?.global?.load)
 
     const [pendingOrder, setPendingOrder] = useState([{ Barcode: "", "Category": "8", "Company_Code": "1", "Description": "", "Discount": "0", "Manufactor": "", "PCode": "111", "ProdID": "2", "name": "SALAZODINE EC TAB 10S ", "price": "92.51" },
     { Barcode: "", "Category": "8", "Company_Code": "1", "Description": "", "Discount": "0", "Manufactor": "", "PCode": "111", "ProdID": "2", "name": "SALAZODINE EC TAB 10S ", "price": "92.51" }, { Barcode: "", "Category": "8", "Company_Code": "1", "Description": "", "Discount": "0", "Manufactor": "", "PCode": "111", "ProdID": "2", "name": "SALAZODINE EC TAB 10S ", "price": "92.51" }, { Barcode: "", "Category": "8", "Company_Code": "1", "Description": "", "Discount": "0", "Manufactor": "", "PCode": "111", "ProdID": "2", "name": "SALAZODINE EC TAB 10S ", "price": "92.51" }])
@@ -155,7 +157,7 @@ const Home = ({ }) => {
     }
     useEffect(() => {
         CheckPostData()
-    })
+    }, [isLoad])
     return (
         <>
             {
@@ -187,14 +189,6 @@ const Home = ({ }) => {
                             }}>
                                 <Icon name="clouddownload" size={responsiveWidth(10)} color={'blue'} />
                             </TouchableOpacity>
-                            {
-                                showOrderScreenCount > 0 && <TouchableOpacity onPress={() => {
-                                    confirmOrder()
-                                }}>
-                                    <Icon name="cloudupload" size={responsiveWidth(10)} color={'blue'} />
-                                </TouchableOpacity>
-                            }
-
                         </View>
 
 

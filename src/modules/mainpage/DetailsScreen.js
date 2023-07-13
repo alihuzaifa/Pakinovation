@@ -3,10 +3,13 @@ import { SafeAreaView, StyleSheet, View, Text, Image, ScrollView, TouchableOpaci
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { responsiveFontSize, responsiveHeight, responsiveWidth } from 'react-native-responsive-dimensions';
+import { setLoad } from '../../redux';
+import { useDispatch } from 'react-redux';
 
 const DetailsScreen = ({ navigation, route }) => {
     const [item, setitem] = useState(route.params);
     const [load, setload] = useState(false);
+    const dispatch = useDispatch()
     const storeData = async () => {
         try {
             setload(true)
@@ -35,6 +38,7 @@ const DetailsScreen = ({ navigation, route }) => {
                 storeArray.push(storeObj);
                 storeArray = JSON.stringify(storeArray)
                 await AsyncStorage.setItem('OrderArray', storeArray);
+                dispatch(setLoad())
                 setload(false)
                 navigation.goBack()
             } else {

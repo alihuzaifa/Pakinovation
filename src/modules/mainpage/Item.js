@@ -1,23 +1,40 @@
-import { StyleSheet, Text, View, SafeAreaView, FlatList, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, SafeAreaView, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { responsiveHeight, responsiveWidth } from 'react-native-responsive-dimensions';
 import * as Animatable from 'react-native-animatable';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { postApiMethod } from '../../features/Api';
+import { useSelector, useDispatch } from 'react-redux';
+import { setLoad } from '../../redux';
+import NetInfo from "@react-native-community/netinfo";
 const Item = ({ navigation }) => {
   const [orderHistory, setOrderHistory] = useState([])
+  const [load, setLoader] = useState(false)
+  const [showBtn, setshowBtn] = useState(false)
+  const isLoad = useSelector(state => state?.global?.load)
+  const dispatch = useDispatch()
   const init = async () => {
+    setLoader(true)
     let checkArrayLength = await AsyncStorage.getItem('OrderArray')
     if (checkArrayLength) {
+
       checkArrayLength = JSON.parse(checkArrayLength)
+
       const getDetail = checkArrayLength?.map(({ details }) => { return details })
+      if (getDetail?.length > 0) {
+        setshowBtn(true)
+      } else {
+        setshowBtn(false)
+      }
       const arrayOfObjects = getDetail?.map(item => item[0]);
       setOrderHistory(arrayOfObjects)
     }
+    setLoader(false)
   }
   useEffect(() => {
     init()
-  }, [])
+  }, [isLoad])
   const CartCard = ({ item, index }) => {
     return (
       <>
@@ -51,21 +68,89 @@ const Item = ({ navigation }) => {
       </>
     );
   };
+  const confirmOrder = async () => {
+    setLoader(true)
+    try {
+      let orderArray = await AsyncStorage.getItem('OrderArray')
+      if (orderArray) {
+        orderArray = JSON.parse(orderArray)
+        const getDetailsArray = orderArray?.map(({ details }) => {
+          return details
+        })
+        const combinedArray = [].concat(...getDetailsArray);
+        if (combinedArray.length > 0) {
+          let DealCustID = await AsyncStorage.getItem('DealCustID');
+          if (DealCustID) {
+            DealCustID = JSON.parse(DealCustID)
+            const obj = { Date: new Date().toDateString(), "DealCustID": DealCustID, UserID: 1, "details": combinedArray, type: "add_new" }
+            let token = await AsyncStorage.getItem('token');
+
+            token = JSON.parse(token)
+            const headers = {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            }
+            const state = await NetInfo.fetch();
+            if (state.isConnected) {
+              const postData = await postApiMethod('orders.php', obj, headers)
+              if (postData?.status === 200) {
+                await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
+                await AsyncStorage.setItem('DealCustID', '')
+                navigation.navigate('Home')
+                dispatch(setLoad())
+              } else {
+                alert("Session Expired")
+              }
+            } else {
+              alert("Please Connect Internet")
+            }
+            console.log('state.isConnected', state.isConnected)
+
+          }
+          setLoader(false)
+        }
+      }
+
+    } catch (error) {
+      setLoader(false)
+    }
+    setLoader(false)
+  }
   return (
-    <SafeAreaView style={{ backgroundColor: 'white' }}>
-      <View style={style.header}>
-        <Icon name="arrow-back-ios" size={28} color={'blue'} onPress={navigation.goBack} />
-        <Text style={{ fontSize: 20, fontFamily: "Poppins-Bold", color: "gray" }}>Order History</Text>
-      </View>
-      <View style={{ marginVertical: responsiveHeight(3) }}>
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: responsiveHeight(10) }}
-          data={orderHistory}
-          renderItem={({ item, index }) => <CartCard item={item} index={index} key={index} />}
-        />
-      </View>
-    </SafeAreaView>
+    <>
+      {
+        load ? <SafeAreaView style={{
+          flex: 1,
+          backgroundColor: '#fff', justifyContent: "center", alignItems: "center"
+        }}>
+          <ActivityIndicator size={'large'} color={'blue'} />
+        </SafeAreaView> : <SafeAreaView style={{ backgroundColor: 'white', flex: 1 }}>
+          <View style={style.header}>
+            <Icon name="arrow-back-ios" size={28} color={'blue'} onPress={navigation.goBack} />
+            <Text style={{ fontSize: 20, fontFamily: "Poppins-Bold", color: "gray" }}>Order History</Text>
+          </View>
+          <View style={{ marginVertical: responsiveHeight(3), height: responsiveHeight(69) }}>
+            <FlatList
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: responsiveHeight(10) }}
+              data={orderHistory}
+              renderItem={({ item, index }) => <CartCard item={item} index={index} key={index} />}
+            />
+          </View>
+          {
+            showBtn && <TouchableOpacity style={{ marginHorizontal: 20, backgroundColor: 'blue', padding: 8, borderRadius: 10, justifyContent: "center", alignItems: "center" }} onPress={() => {
+              confirmOrder()
+            }}>
+              <Text style={{ fontFamily: "Poppins-Bold", fontSize: 14, color: '#fff' }}>
+                Checkout
+              </Text>
+            </TouchableOpacity>
+          }
+
+        </SafeAreaView>
+      }
+    </>
+
   )
 }
 export default Item
