@@ -82,28 +82,51 @@ const Item = ({ navigation }) => {
           let DealCustID = await AsyncStorage.getItem('DealCustID');
           if (DealCustID) {
             DealCustID = JSON.parse(DealCustID)
-            const obj = { Date: new Date().toDateString(), "DealCustID": DealCustID, UserID: 1, "details": combinedArray, type: "add_new" }
-            let token = await AsyncStorage.getItem('token');
+            let allOrder = []
+            let obj = { Date: new Date().toDateString(), "DealCustID": DealCustID, UserID: 1, "details": combinedArray, type: "add_new" }
+            let arrayString = await AsyncStorage.getItem('postArray');
+            if (arrayString) {
+              arrayString = JSON.parse(arrayString)
+              allOrder = arrayString
+            }
+            allOrder.push(obj)
+            obj = JSON.stringify(allOrder)
+            await AsyncStorage.setItem('postArray', obj);
+            await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
+            await AsyncStorage.setItem('DealCustID', '')
+            navigation.navigate('Home')
+            dispatch(setLoad())
+            // if (arrayString !== null) {
+            //   console.log("Hello")
+            //   let array = []
+            //   let retrievedArray = JSON.parse(arrayString);
+            //   if (retrievedArray.length > 0) {
+            //     array = retrievedArray
+            //     array.push(obj)
+            //     array = JSON.stringify(array)
+            // await AsyncStorage.setItem('postArray', array);
+            // await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
+            // await AsyncStorage.setItem('DealCustID', '')
+            // navigation.navigate('Home')
+            // dispatch(setLoad())
+            //     console.log("Not Correct")
+            //   }
+            // } else {
+            //   await AsyncStorage.setItem('postArray', JSON.stringify([obj]));
+            //   console.log("Correct")
+            //   await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
+            //   await AsyncStorage.setItem('DealCustID', '')
+            //   navigation.navigate('Home')
+            //   dispatch(setLoad())
+            // }
+            // let token = await AsyncStorage.getItem('token');
 
-            token = JSON.parse(token)
-            const headers = {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            }
-            const state = await NetInfo.fetch();
-            if (state.isConnected) {
-              const postData = await postApiMethod('orders.php', obj, headers)
-              if (postData?.status === 200) {
-                await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
-                await AsyncStorage.setItem('DealCustID', '')
-                navigation.navigate('Home')
-                dispatch(setLoad())
-              } else {
-                alert("Session Expired")
-              }
-            } else {
-              alert("Please Connect Internet")
-            }
+            // token = JSON.parse(token)
+            // const headers = {
+            //   'Authorization': `Bearer ${token}`,
+            //   'Content-Type': 'application/json',
+            // }
+
             console.log('state.isConnected', state.isConnected)
 
           }

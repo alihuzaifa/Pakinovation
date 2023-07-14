@@ -10,16 +10,16 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import NetInfo from "@react-native-community/netinfo";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getApiMethod, postApiMethod } from '../../features/Api';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const Home = ({ }) => {
     const [load, setLoad] = useState(false)
     const [isNetConnect, setIsNetConnect] = useState(false)
     const [showOrderScreenCount, setshowOrderScreenCount] = useState(0)
     const isLoad = useSelector(state => state?.global?.load)
+    const dispatch = useDispatch()
 
-    const [pendingOrder, setPendingOrder] = useState([{ Barcode: "", "Category": "8", "Company_Code": "1", "Description": "", "Discount": "0", "Manufactor": "", "PCode": "111", "ProdID": "2", "name": "SALAZODINE EC TAB 10S ", "price": "92.51" },
-    { Barcode: "", "Category": "8", "Company_Code": "1", "Description": "", "Discount": "0", "Manufactor": "", "PCode": "111", "ProdID": "2", "name": "SALAZODINE EC TAB 10S ", "price": "92.51" }, { Barcode: "", "Category": "8", "Company_Code": "1", "Description": "", "Discount": "0", "Manufactor": "", "PCode": "111", "ProdID": "2", "name": "SALAZODINE EC TAB 10S ", "price": "92.51" }, { Barcode: "", "Category": "8", "Company_Code": "1", "Description": "", "Discount": "0", "Manufactor": "", "PCode": "111", "ProdID": "2", "name": "SALAZODINE EC TAB 10S ", "price": "92.51" }])
+    const [pendingOrder, setPendingOrder] = useState([])
 
 
     const getAllAppData = async () => {
@@ -69,37 +69,90 @@ const Home = ({ }) => {
     const confirmOrder = async () => {
         setLoad(true)
         try {
-            let orderArray = await AsyncStorage.getItem('OrderArray')
+            let orderArray = await AsyncStorage.getItem('postArray')
             if (orderArray) {
                 orderArray = JSON.parse(orderArray)
-                const getDetailsArray = orderArray?.map(({ details }) => {
-                    return details
-                })
-                const combinedArray = [].concat(...getDetailsArray);
-                if (combinedArray.length > 0) {
-                    let DealCustID = await AsyncStorage.getItem('DealCustID');
-                    if (DealCustID) {
-                        DealCustID = JSON.parse(DealCustID)
-                        const obj = { Date: new Date().toDateString(), "DealCustID": DealCustID, UserID: 1, "details": combinedArray, type: "add_new" }
-                        let token = await AsyncStorage.getItem('token');
-                        token = JSON.parse(token)
-                        const headers = {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        };
-                        const postData = await postApiMethod('orders.php', obj, headers)
-                        await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
-                        await AsyncStorage.setItem('DealCustID', '')
-                        setshowOrderScreenCount(0)
+                if (orderArray.length > 0) {
+                    const state = await NetInfo.fetch();
+                    let token = await AsyncStorage.getItem('token');
+                    token = JSON.parse(token)
+                    const headers = {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
                     }
-                    setLoad(false)
+                    if (state.isConnected) {
+                        for (let index = 0; index < orderArray.length; index++) {
+                            const postData = await postApiMethod('orders.php', orderArray[index], headers)
+                            console.log("🚀 ~ postData:", postData?.status)
+                            console.log("🚀 ~ postData:", postData?.data)
+                            if (postData?.status === 200) {
+                                alert("Order Recieved Successfully")
+                                
+                            } else {
+                                alert('Your Session has Expired Login Again')
+                            }
+                        }
+                        await AsyncStorage.setItem('postArray', JSON.stringify([]))
+                        setshowOrderScreenCount(0)
+                        setPendingOrder([])
+                        dispatch(setLoad())
+                    } else {
+                        alert("Please Connect Internet")
+                    }
+
+                } else {
+                    alert('Call Not')
                 }
             }
-
+            // const state = await NetInfo.fetch();
+            // if (state.isConnected) {
+            // const postData = await postApiMethod('orders.php', obj, headers)
+            // if (postData?.status === 200) {
+            //         await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
+            //         await AsyncStorage.setItem('DealCustID', '')
+            //         navigation.navigate('Home')
+            //         dispatch(setLoad())
+            //     } else {
+            //         alert("Session Expired")
+            //     }
+            // } else {
+            //     alert("Please Connect Internet")
+            // }
         } catch (error) {
-            console.log("🚀 ~ error:", error)
-            setLoad(false)
+
         }
+        // try {
+        //     let orderArray = await AsyncStorage.getItem('OrderArray')
+        //     if (orderArray) {
+        //         orderArray = JSON.parse(orderArray)
+        //         const getDetailsArray = orderArray?.map(({ details }) => {
+        //             return details
+        //         })
+        //         const combinedArray = [].concat(...getDetailsArray);
+        //         if (combinedArray.length > 0) {
+        //             let DealCustID = await AsyncStorage.getItem('DealCustID');
+        //             if (DealCustID) {
+        //                 DealCustID = JSON.parse(DealCustID)
+        //                 const obj = { Date: new Date().toDateString(), "DealCustID": DealCustID, UserID: 1, "details": combinedArray, type: "add_new" }
+        //                 let token = await AsyncStorage.getItem('token');
+        //                 token = JSON.parse(token)
+        //                 const headers = {
+        //                     'Authorization': `Bearer ${token}`,
+        //                     'Content-Type': 'application/json'
+        //                 };
+        //                 const postData = await postApiMethod('orders.php', obj, headers)
+        //                 await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
+        //                 await AsyncStorage.setItem('DealCustID', '')
+        //                 setshowOrderScreenCount(0)
+        //             }
+        //             setLoad(false)
+        //         }
+        //     }
+
+        // } catch (error) {
+        //     console.log("🚀 ~ error:", error)
+        //     setLoad(false)
+        // }
         setLoad(false)
     }
     const CartCard = ({ item, index }) => {
@@ -110,9 +163,7 @@ const Home = ({ }) => {
                     animation="slideInDown" // animation type
                     key={index} >
                     <TouchableOpacity style={styles.cartCard}
-                    // onPress={() => {
-                    //     navigation.navigate('DetailsScreen', item)
-                    // }}
+
                     >
 
                         <View
@@ -123,11 +174,10 @@ const Home = ({ }) => {
                                 flex: 1,
                             }}>
                             <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16, color: 'gray' }}>
-                                {item?.name}
+                                {item?.Boxes > 0 ? 'Boxes' : 'Pieces'}   {item?.Boxes > 0 ? item?.Boxes : item?.Pieces}
                             </Text>
                             <Text style={{ fontSize: 17, color: 'gray', fontFamily: "Poppins-Bold" }}>
-                                {/* Price {item?.price} */}
-                                Status Pending
+                                Price {item?.price}
                             </Text>
 
                         </View>
@@ -143,11 +193,17 @@ const Home = ({ }) => {
 
     const CheckPostData = async () => {
         try {
-            let checkArrayLength = await AsyncStorage.getItem('OrderArray')
+            let checkArrayLength = await AsyncStorage.getItem('postArray')
             if (checkArrayLength) {
                 checkArrayLength = JSON.parse(checkArrayLength)
                 if (checkArrayLength.length > 0) {
                     setshowOrderScreenCount(checkArrayLength.length)
+                    const allDetailsArray = checkArrayLength?.map(({ details }) => { return details })
+                    const arrayOfObjects = [].concat(...allDetailsArray?.map(subArray => subArray?.map(obj => ({ ...obj }))));
+                    setPendingOrder(arrayOfObjects)
+                } else {
+                    setshowOrderScreenCount(0)
+                    setPendingOrder([])
                 }
             }
 
@@ -187,8 +243,16 @@ const Home = ({ }) => {
                             <TouchableOpacity onPress={() => {
                                 getAllAppData()
                             }}>
-                                <Icon name="clouddownload" size={responsiveWidth(10)} color={'blue'} />
+                                <Icon name="download" size={responsiveWidth(8)} color={'blue'} />
                             </TouchableOpacity>
+                            {
+                                showOrderScreenCount > 0 && <TouchableOpacity onPress={() => {
+                                    confirmOrder()
+                                }}>
+                                    <Icon name="upload" size={responsiveWidth(8)} color={'blue'} />
+                                </TouchableOpacity>
+                            }
+
                         </View>
 
 
