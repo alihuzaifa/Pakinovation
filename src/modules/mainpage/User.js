@@ -23,52 +23,15 @@ const User = ({ navigation }) => {
       unsubscribe();
     }
   }, [])
-
-  // const getShops = async () => {
-  //   const unsubscribe = NetInfo.addEventListener(state => {
-  //     setIsnetConnect(state.isConnected)
-  //     if (state.isConnected) {
-
-  //     } else {
-  //       console.log("Not Hello")
-  //     }
-  //   });
-  //   // try {
-  //   //   setLoad(true)
-  //   //   const token = await AsyncStorage.getItem('token');
-  //   //   const [getList] = await Promise.all([getApiMethod('dealcust.php', JSON.parse(token))]);
-  //   //   const updatedArray = getList?.data?.data?.map((item, index) => {
-  //   //     const { "DealCustID ": dealCustID, ...rest } = item;
-  //   //     return { "DealCustID": dealCustID, ...rest };
-  //   //   });
-
-  //   //   const shopList = updatedArray?.map((item) => {
-  //   //     return {
-  //   //       ...item,
-  //   //       image: require("../../assets/images/image1.png"),
-  //   //       name: item?.name,
-  //   //       address: item?.address,
-
-  //   //     }
-  //   //   })
-  //   //   setNotApproved(shopList)
-
-  //   // } catch (error) {
-  //   //   setLoad(false)
-  //   // }
-  //   setLoad(false)
-  // }
-
-
   const moveToProduct = async (item) => {
     try {
       let id = JSON.stringify(item?.DealCustID)
+      let name = JSON.stringify(item?.name)
       await AsyncStorage.setItem('DealCustID', id);
+      await AsyncStorage.setItem('name', name);
       navigation.navigate('Product')
     } catch (error) {
     }
-    // const token = await AsyncStorage.getItem('token');
-    // console.log("🚀 ~item:", item?.DealCustID)
   }
 
   useEffect(() => {

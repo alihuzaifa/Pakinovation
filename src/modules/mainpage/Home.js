@@ -16,10 +16,12 @@ const Home = ({ }) => {
     const [load, setLoad] = useState(false)
     const [isNetConnect, setIsNetConnect] = useState(false)
     const [showOrderScreenCount, setshowOrderScreenCount] = useState(0)
+    const [active, setactive] = useState(-1)
     const isLoad = useSelector(state => state?.global?.load)
     const dispatch = useDispatch()
-
     const [pendingOrder, setPendingOrder] = useState([])
+    const [categories, setcategories] = useState([])
+
 
 
     const getAllAppData = async () => {
@@ -72,6 +74,11 @@ const Home = ({ }) => {
             let orderArray = await AsyncStorage.getItem('postArray')
             if (orderArray) {
                 orderArray = JSON.parse(orderArray)
+                const updatedData = orderArray?.map(item => {
+                    const { name, ...rest } = item;
+                    return rest;
+                });
+                orderArray = updatedData
                 if (orderArray.length > 0) {
                     const state = await NetInfo.fetch();
                     let token = await AsyncStorage.getItem('token');
@@ -83,11 +90,9 @@ const Home = ({ }) => {
                     if (state.isConnected) {
                         for (let index = 0; index < orderArray.length; index++) {
                             const postData = await postApiMethod('orders.php', orderArray[index], headers)
-                            console.log("🚀 ~ postData:", postData?.status)
-                            console.log("🚀 ~ postData:", postData?.data)
                             if (postData?.status === 200) {
                                 alert("Order Recieved Successfully")
-                                
+
                             } else {
                                 alert('Your Session has Expired Login Again')
                             }
@@ -95,64 +100,19 @@ const Home = ({ }) => {
                         await AsyncStorage.setItem('postArray', JSON.stringify([]))
                         setshowOrderScreenCount(0)
                         setPendingOrder([])
+                        setcategories([])
                         dispatch(setLoad())
                     } else {
                         alert("Please Connect Internet")
                     }
 
-                } else {
-                    alert('Call Not')
                 }
             }
-            // const state = await NetInfo.fetch();
-            // if (state.isConnected) {
-            // const postData = await postApiMethod('orders.php', obj, headers)
-            // if (postData?.status === 200) {
-            //         await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
-            //         await AsyncStorage.setItem('DealCustID', '')
-            //         navigation.navigate('Home')
-            //         dispatch(setLoad())
-            //     } else {
-            //         alert("Session Expired")
-            //     }
-            // } else {
-            //     alert("Please Connect Internet")
-            // }
+
         } catch (error) {
 
         }
-        // try {
-        //     let orderArray = await AsyncStorage.getItem('OrderArray')
-        //     if (orderArray) {
-        //         orderArray = JSON.parse(orderArray)
-        //         const getDetailsArray = orderArray?.map(({ details }) => {
-        //             return details
-        //         })
-        //         const combinedArray = [].concat(...getDetailsArray);
-        //         if (combinedArray.length > 0) {
-        //             let DealCustID = await AsyncStorage.getItem('DealCustID');
-        //             if (DealCustID) {
-        //                 DealCustID = JSON.parse(DealCustID)
-        //                 const obj = { Date: new Date().toDateString(), "DealCustID": DealCustID, UserID: 1, "details": combinedArray, type: "add_new" }
-        //                 let token = await AsyncStorage.getItem('token');
-        //                 token = JSON.parse(token)
-        //                 const headers = {
-        //                     'Authorization': `Bearer ${token}`,
-        //                     'Content-Type': 'application/json'
-        //                 };
-        //                 const postData = await postApiMethod('orders.php', obj, headers)
-        //                 await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
-        //                 await AsyncStorage.setItem('DealCustID', '')
-        //                 setshowOrderScreenCount(0)
-        //             }
-        //             setLoad(false)
-        //         }
-        //     }
 
-        // } catch (error) {
-        //     console.log("🚀 ~ error:", error)
-        //     setLoad(false)
-        // }
         setLoad(false)
     }
     const CartCard = ({ item, index }) => {
@@ -198,9 +158,12 @@ const Home = ({ }) => {
                 checkArrayLength = JSON.parse(checkArrayLength)
                 if (checkArrayLength.length > 0) {
                     setshowOrderScreenCount(checkArrayLength.length)
-                    const allDetailsArray = checkArrayLength?.map(({ details }) => { return details })
-                    const arrayOfObjects = [].concat(...allDetailsArray?.map(subArray => subArray?.map(obj => ({ ...obj }))));
-                    setPendingOrder(arrayOfObjects)
+                    const allDetailsArray = checkArrayLength?.map(({ details, name, DealCustID }) => {
+                        return {
+                            name, details, DealCustID
+                        }
+                    })
+                    setcategories(allDetailsArray)
                 } else {
                     setshowOrderScreenCount(0)
                     setPendingOrder([])
@@ -214,6 +177,10 @@ const Home = ({ }) => {
     useEffect(() => {
         CheckPostData()
     }, [isLoad])
+    const selected = (item, index) => {
+        setactive(index)
+        setPendingOrder(item?.details)
+    }
     return (
         <>
             {
@@ -277,6 +244,52 @@ const Home = ({ }) => {
                             }}>
                             Pending Orders
                         </Text>
+
+
+                        <View style={{
+                            paddingLeft: responsiveWidth(4),
+                            marginBottom: responsiveHeight(1)
+                        }}>
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+
+                            >
+                                {categories?.map((category, index) => (
+                                    <TouchableOpacity
+                                        onPress={() => selected(category, index)}
+                                        style={[
+                                            {
+                                                paddingHorizontal: responsiveWidth(3),
+                                                paddingVertical: responsiveHeight(0.8),
+                                                borderWidth: 1,
+                                                borderRadius: responsiveWidth(5),
+                                                borderColor: 'blue',
+                                                marginRight: responsiveWidth(2),
+                                            },
+                                            active === index && {
+                                                backgroundColor: 'blue',
+                                            },
+                                        ]}
+                                        key={category.id}
+                                    >
+                                        <Text
+                                            style={{
+                                                color:
+                                                    active === index
+                                                        ? 'white'
+                                                        : 'black',
+                                                fontSize: responsiveFontSize(1.7),
+                                                fontFamily: 'Poppins-Bold',
+                                            }}
+                                        >
+                                            {category.name}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                        </View>
+
 
                         <ScrollView>
                             {

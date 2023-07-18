@@ -80,54 +80,27 @@ const Item = ({ navigation }) => {
         const combinedArray = [].concat(...getDetailsArray);
         if (combinedArray.length > 0) {
           let DealCustID = await AsyncStorage.getItem('DealCustID');
+          let name = await AsyncStorage.getItem('name');
           if (DealCustID) {
-            DealCustID = JSON.parse(DealCustID)
-            let allOrder = []
-            let obj = { Date: new Date().toDateString(), "DealCustID": DealCustID, UserID: 1, "details": combinedArray, type: "add_new" }
-            let arrayString = await AsyncStorage.getItem('postArray');
-            if (arrayString) {
-              arrayString = JSON.parse(arrayString)
-              allOrder = arrayString
+            if (name) {
+              name = JSON.parse(name)
+              DealCustID = JSON.parse(DealCustID)
+              let allOrder = []
+              let obj = { Date: new Date().toDateString(), "DealCustID": DealCustID, UserID: 1, "details": combinedArray, type: "add_new", name }
+              let arrayString = await AsyncStorage.getItem('postArray');
+              if (arrayString) {
+                arrayString = JSON.parse(arrayString)
+                allOrder = arrayString
+              }
+              allOrder.push(obj)
+              obj = JSON.stringify(allOrder)
+              await AsyncStorage.setItem('postArray', obj);
+              await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
+              await AsyncStorage.setItem('DealCustID', '')
+              navigation.navigate('Home')
+              dispatch(setLoad())
             }
-            allOrder.push(obj)
-            obj = JSON.stringify(allOrder)
-            await AsyncStorage.setItem('postArray', obj);
-            await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
-            await AsyncStorage.setItem('DealCustID', '')
-            navigation.navigate('Home')
-            dispatch(setLoad())
-            // if (arrayString !== null) {
-            //   console.log("Hello")
-            //   let array = []
-            //   let retrievedArray = JSON.parse(arrayString);
-            //   if (retrievedArray.length > 0) {
-            //     array = retrievedArray
-            //     array.push(obj)
-            //     array = JSON.stringify(array)
-            // await AsyncStorage.setItem('postArray', array);
-            // await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
-            // await AsyncStorage.setItem('DealCustID', '')
-            // navigation.navigate('Home')
-            // dispatch(setLoad())
-            //     console.log("Not Correct")
-            //   }
-            // } else {
-            //   await AsyncStorage.setItem('postArray', JSON.stringify([obj]));
-            //   console.log("Correct")
-            //   await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
-            //   await AsyncStorage.setItem('DealCustID', '')
-            //   navigation.navigate('Home')
-            //   dispatch(setLoad())
-            // }
-            // let token = await AsyncStorage.getItem('token');
 
-            // token = JSON.parse(token)
-            // const headers = {
-            //   'Authorization': `Bearer ${token}`,
-            //   'Content-Type': 'application/json',
-            // }
-
-            console.log('state.isConnected', state.isConnected)
 
           }
           setLoader(false)
