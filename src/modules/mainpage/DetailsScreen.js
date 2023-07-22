@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, View, Text, Image, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { SafeAreaView, StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { responsiveFontSize, responsiveHeight, responsiveWidth } from 'react-native-responsive-dimensions';
 import { setLoad } from '../../redux';
 import { useDispatch } from 'react-redux';
-
 const DetailsScreen = ({ navigation, route }) => {
     const [item, setitem] = useState(route.params);
     const [load, setload] = useState(false);
@@ -24,15 +23,16 @@ const DetailsScreen = ({ navigation, route }) => {
                     DealCustID: DealCustID,
                     Date: new Date().toDateString(),
                     UserID: 1,
+                    id: new Date().getTime(),
                     details: [
                         {
                             "ProdID": item?.ProdID,
-                            "Price": item?.price,
+                            "Price": item?.isBox ? (item?.price * 12).toFixed(2) : item.price,
                             "Pieces": item?.isPacket ? item?.packet : 0,
-                            "Boxes": item?.isBox ? item?.box : 0
+                            "Boxes": item?.isBox ? item?.box : 0,
+                            "id": new Date().getTime(),
+                            "name": item.name,
                         },
-
-
                     ]
                 }
                 storeArray.push(storeObj);
@@ -47,12 +47,15 @@ const DetailsScreen = ({ navigation, route }) => {
                     DealCustID: DealCustID,
                     Date: new Date().toDateString(),
                     UserID: 1,
+                    id: new Date().getTime(),
                     details: [
                         {
                             "ProdID": item?.ProdID,
-                            "Price": item?.price,
+                            "Price": item?.isBox ? (item?.price * 12).toFixed(2) : item.price,
                             "Pieces": item?.isPacket ? item?.packet : 0,
-                            "Boxes": item?.isBox ? item?.box : 0
+                            "Boxes": item?.isBox ? item?.box : 0,
+                            "name": item.name,
+                            "id": new Date().getTime(),
                         },
 
 
@@ -87,7 +90,6 @@ const DetailsScreen = ({ navigation, route }) => {
         setitem(updatedItem);
 
     }
-
     const increaseQty = () => {
         if (item.isBox) {
             const updatedItem = {
@@ -95,14 +97,12 @@ const DetailsScreen = ({ navigation, route }) => {
             };
             const increasePrice = { ...updatedItem, price: Number(updatedItem?.box * updatedItem.actualPrice).toFixed(2) }
             setitem(increasePrice)
-            // console.log("🚀 increasePrice:", increasePrice)
         } else {
             const updatedItem = {
                 ...item, packet: item?.packet + 1,
             };
             const increasePrice = { ...updatedItem, price: Number(updatedItem?.packet * updatedItem.actualPrice).toFixed(2) }
             setitem(increasePrice)
-            // console.log('Packet True', item?.packet)
         }
 
     }
@@ -123,11 +123,9 @@ const DetailsScreen = ({ navigation, route }) => {
                 const increasePrice = { ...updatedItem, price: Number(updatedItem?.price - updatedItem.actualPrice).toFixed(2) }
                 setitem(increasePrice)
             }
-            // console.log('Packet True', item?.packet)
         }
 
     }
-
     return (
         <SafeAreaView style={{ backgroundColor: 'white' }}>
             <View style={style.header}>
@@ -135,19 +133,7 @@ const DetailsScreen = ({ navigation, route }) => {
                 <Text style={{ fontSize: 20, fontFamily: "Poppins-Bold", color: "gray" }}>Details</Text>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
-                <View
-                    style={{
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: responsiveHeight(30),
-                    }}>
-                    <Text
-                        style={{ fontSize: responsiveFontSize(5), fontFamily: "Poppins-Bold" }}>
-                        Pakinovation
-                    </Text>
-                    {/* <Image source={{ uri: item.image }} style={{ height: 220, width: 220 }} /> */}
-                </View>
-                <View style={[style.details, { height: responsiveHeight(60) }]}>
+                <View style={[style.details, { height: responsiveHeight(90) }]}>
                     <View
                         style={{
                             flexDirection: 'row',
@@ -169,7 +155,7 @@ const DetailsScreen = ({ navigation, route }) => {
                         }}>
                         <Text
                             style={{ fontSize: responsiveFontSize(3), fontFamily: "Poppins-Bold", color: '#fff' }}>
-                            Price {item.price}
+                            Price {item?.isBox ? (item?.actualPrice * 12).toFixed(2) : item?.actualPrice} /  {item?.isBox ? 'Boxes' : 'Packet'}
                         </Text>
 
                     </View>
@@ -291,7 +277,6 @@ const DetailsScreen = ({ navigation, route }) => {
         </SafeAreaView >
     );
 };
-
 const style = StyleSheet.create({
     header: {
         paddingVertical: 20,
@@ -307,7 +292,6 @@ const style = StyleSheet.create({
         borderTopLeftRadius: responsiveWidth(10),
 
     },
-
     title: {
         color: '#fff', fontFamily: 'Poppins-SemiBold', fontSize: responsiveFontSize(2)
     },
@@ -331,5 +315,4 @@ const style = StyleSheet.create({
 
     },
 });
-
 export default DetailsScreen;

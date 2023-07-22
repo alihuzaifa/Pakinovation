@@ -75,7 +75,7 @@ const Home = ({ }) => {
             if (orderArray) {
                 orderArray = JSON.parse(orderArray)
                 const updatedData = orderArray?.map(item => {
-                    const { name, ...rest } = item;
+                    const { name, id, ...rest } = item;
                     return rest;
                 });
                 orderArray = updatedData
@@ -105,7 +105,6 @@ const Home = ({ }) => {
                     } else {
                         alert("Please Connect Internet")
                     }
-
                 }
             }
 
@@ -119,31 +118,34 @@ const Home = ({ }) => {
         return (
             <>
                 <Animatable.View
-                    delay={index * 120} // delay for each item
-                    animation="slideInDown" // animation type
+                    delay={index * 120}
+                    animation="slideInDown"
                     key={index} >
                     <TouchableOpacity style={styles.cartCard}
 
                     >
-
                         <View
                             style={{
-                                height: 100,
                                 marginLeft: 10,
                                 paddingVertical: 20,
                                 flex: 1,
                             }}>
-                            <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16, color: 'gray' }}>
-                                {item?.Boxes > 0 ? 'Boxes' : 'Pieces'}   {item?.Boxes > 0 ? item?.Boxes : item?.Pieces}
-                            </Text>
-                            <Text style={{ fontSize: 17, color: 'gray', fontFamily: "Poppins-Bold" }}>
-                                Price {item?.price}
-                            </Text>
-
+                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" }}>
+                                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16, color: 'gray' }}>
+                                    {item?.name}
+                                </Text>
+                            </View>
+                            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", marginTop: responsiveHeight(1.3) }}>
+                                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16, color: 'gray' }}>
+                                    {item?.Boxes > 0 ? 'Boxes' : 'Pieces'} {" "}
+                                    {item?.Boxes > 0 ? item?.Boxes : item?.Pieces}
+                                </Text>
+                                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16, color: 'gray' }}>
+                                    {item?.Price}
+                                </Text>
+                            </View>
                         </View>
-                        {/* <TouchableOpacity onPress={() => { storeData(item, index) }}>
-                            <Icon name="plus" size={responsiveWidth(7)} color={'blue'} />
-                        </TouchableOpacity> */}
+
                     </TouchableOpacity>
                 </Animatable.View>
 
@@ -195,17 +197,13 @@ const Home = ({ }) => {
                             flex: 1,
                             backgroundColor: '#fff',
                         }}>
-
-                        {/* <Header /> */}
                         <View
-
                             style={{
                                 marginTop: responsiveHeight(5),
                                 flexDirection: 'row',
                                 paddingHorizontal: responsiveWidth(5.5),
                                 justifyContent: 'space-between', alignItems: "center"
                             }}
-
                         >
                             <TouchableOpacity onPress={() => {
                                 getAllAppData()
@@ -219,44 +217,28 @@ const Home = ({ }) => {
                                     <Icon name="upload" size={responsiveWidth(8)} color={'blue'} />
                                 </TouchableOpacity>
                             }
-
                         </View>
-
-
-
-                        <View style={{
-                            paddingHorizontal: responsiveWidth(4),
-                            justifyContent: 'center', alignItems: "center"
-                        }}>
-
-                            <View style={{ width: responsiveWidth(91), height: responsiveHeight(25), justifyContent: "center", alignItems: "center", borderColor: 'black', borderWidth: 1, borderRadius: responsiveWidth(2.7), marginTop: responsiveHeight(3.5), borderColor: '#75E6DA' }}>
-
-                            </View>
-                        </View>
-
-                        <Text
-                            style={{
-                                paddingHorizontal: responsiveWidth(4),
-                                fontSize: responsiveFontSize(2.8),
-                                fontFamily: "Poppins-SemiBold",
-                                color: 'blue',
-                                marginTop: responsiveHeight(1.8)
-                            }}>
-                            Pending Orders
-                        </Text>
-
-
+                        {
+                            categories?.length > 0 && <Text
+                                style={{
+                                    paddingHorizontal: responsiveWidth(4),
+                                    fontSize: responsiveFontSize(2.8),
+                                    fontFamily: "Poppins-SemiBold",
+                                    color: 'blue',
+                                    marginVertical: responsiveHeight(2)
+                                }}>
+                                Pending Orders
+                            </Text>
+                        }
                         <View style={{
                             paddingLeft: responsiveWidth(4),
-                            marginBottom: responsiveHeight(1)
+                            marginBottom: responsiveHeight(1),
+                            height: responsiveHeight(25)
                         }}>
                             <ScrollView
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-
                             >
                                 {categories?.map((category, index) => (
-                                    <TouchableOpacity
+                                    <TouchableOpacity key={index}
                                         onPress={() => selected(category, index)}
                                         style={[
                                             {
@@ -266,12 +248,12 @@ const Home = ({ }) => {
                                                 borderRadius: responsiveWidth(5),
                                                 borderColor: 'blue',
                                                 marginRight: responsiveWidth(2),
+                                                marginVertical: responsiveHeight(0.7)
                                             },
                                             active === index && {
                                                 backgroundColor: 'blue',
                                             },
                                         ]}
-                                        key={category.id}
                                     >
                                         <Text
                                             style={{
@@ -289,9 +271,7 @@ const Home = ({ }) => {
                                 ))}
                             </ScrollView>
                         </View>
-
-
-                        <ScrollView>
+                        <ScrollView showsVerticalScrollIndicator={false}>
                             {
                                 pendingOrder?.map((item, index) => {
                                     return <CartCard item={item} index={index} key={index} />

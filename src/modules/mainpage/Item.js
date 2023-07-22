@@ -1,13 +1,14 @@
 import { StyleSheet, Text, View, SafeAreaView, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Cross from 'react-native-vector-icons/Entypo';
+import AntD from 'react-native-vector-icons/AntDesign';
 import { responsiveHeight, responsiveWidth } from 'react-native-responsive-dimensions';
 import * as Animatable from 'react-native-animatable';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { postApiMethod } from '../../features/Api';
 import { useSelector, useDispatch } from 'react-redux';
 import { setLoad } from '../../redux';
-import NetInfo from "@react-native-community/netinfo";
+
 const Item = ({ navigation }) => {
   const [orderHistory, setOrderHistory] = useState([])
   const [load, setLoader] = useState(false)
@@ -18,9 +19,7 @@ const Item = ({ navigation }) => {
     setLoader(true)
     let checkArrayLength = await AsyncStorage.getItem('OrderArray')
     if (checkArrayLength) {
-
       checkArrayLength = JSON.parse(checkArrayLength)
-
       const getDetail = checkArrayLength?.map(({ details }) => { return details })
       if (getDetail?.length > 0) {
         setshowBtn(true)
@@ -35,12 +34,82 @@ const Item = ({ navigation }) => {
   useEffect(() => {
     init()
   }, [isLoad])
+  const deleteProduct = async (id) => {
+    let orderArray = await AsyncStorage.getItem('OrderArray')
+    if (orderArray) {
+      orderArray = JSON.parse(orderArray)
+      let filterOrderArray = orderArray?.filter((obj) => {
+        return obj?.id !== id
+      })
+      const allOrders = [...orderHistory]
+      const filterOrderHistory = allOrders?.filter((obj) => {
+        return obj?.id !== id
+      })
+      if (filterOrderHistory.length > 0) {
+        filterOrderArray = JSON.stringify(filterOrderArray)
+        await AsyncStorage.setItem('OrderArray', filterOrderArray)
+        dispatch(setLoad())
+        setOrderHistory(filterOrderHistory)
+      } else {
+        filterOrderArray = JSON.stringify(filterOrderArray)
+        await AsyncStorage.setItem('OrderArray', filterOrderArray)
+        setOrderHistory(filterOrderHistory)
+        dispatch(setLoad())
+        await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
+        await AsyncStorage.setItem('DealCustID', '')
+        navigation.navigate('Home')
+      }
+    }
+  }
+  const increaseQty = (item, index) => {
+    if (item?.Boxes > 0) {
+
+    } else {
+
+    }
+    console.log("🚀item:", item)
+    console.log("index:", index)
+    // if (item.isBox) {
+    //   const updatedItem = {
+    //     ...item, box: item?.box + 1,
+    //   };
+    //   const increasePrice = { ...updatedItem, price: Number(updatedItem?.box * updatedItem.actualPrice).toFixed(2) }
+    //   setitem(increasePrice)
+    // } else {
+    //   const updatedItem = {
+    //     ...item, packet: item?.packet + 1,
+    //   };
+    //   const increasePrice = { ...updatedItem, price: Number(updatedItem?.packet * updatedItem.actualPrice).toFixed(2) }
+    //   setitem(increasePrice)
+    // }
+
+  }
+  const decreaseQty = () => {
+    // if (item.isBox) {
+    //   if (item?.box > 1) {
+    //     const updatedItem = {
+    //       ...item, box: item?.box - 1,
+    //     };
+    //     const increasePrice = { ...updatedItem, price: Number(updatedItem?.price - updatedItem.actualPrice).toFixed(2) }
+    //     setitem(increasePrice)
+    //   }
+    // } else {
+    //   if (item?.packet > 1) {
+    //     const updatedItem = {
+    //       ...item, packet: item?.packet - 1,
+    //     };
+    //     const increasePrice = { ...updatedItem, price: Number(updatedItem?.price - updatedItem.actualPrice).toFixed(2) }
+    //     setitem(increasePrice)
+    //   }
+    // }
+
+  }
   const CartCard = ({ item, index }) => {
     return (
       <>
         <Animatable.View
-          delay={index * 120} // delay for each item
-          animation="slideInDown" // animation type
+          delay={index * 120}
+          animation="slideInDown"
           key={index} >
           <TouchableOpacity style={style.cartCard}
 
@@ -53,12 +122,38 @@ const Item = ({ navigation }) => {
               }}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" }}>
                 <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16, color: 'gray' }}>
+                  {item?.name}
+                </Text>
+                <TouchableOpacity onPress={() => {
+                  deleteProduct(item?.id)
+                }}>
+                  <Cross name="cross" size={28} color={'blue'} />
+                </TouchableOpacity>
+              </View>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", marginTop: responsiveHeight(1.3) }}>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16, color: 'gray' }}>
                   {item?.Boxes > 0 ? 'Boxes' : 'Pieces'} {" "}
                   {item?.Boxes > 0 ? item?.Boxes : item?.Pieces}
                 </Text>
                 <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16, color: 'gray' }}>
                   {item?.Price}
                 </Text>
+              </View>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", marginTop: responsiveHeight(2) }}>
+                <Text style={{ fontFamily: "Poppins-Bold", fontSize: 16, color: 'gray' }}>
+                </Text>
+                <View style={{ gap: responsiveHeight(1) }}>
+                  <TouchableOpacity onPress={() => {
+                    increaseQty(item, index)
+                  }}>
+                    <AntD name="plus" size={28} color={'blue'} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => {
+
+                  }}>
+                    <AntD name="minus" size={28} color={'blue'} />
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
 
