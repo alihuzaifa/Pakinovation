@@ -32,6 +32,7 @@ const DetailsScreen = ({ navigation, route }) => {
                             "Boxes": item?.isBox ? item?.box : 0,
                             "id": new Date().getTime(),
                             "name": item.name,
+                            "actualPrice": item?.actualPrice
                         },
                     ]
                 }
@@ -56,6 +57,7 @@ const DetailsScreen = ({ navigation, route }) => {
                             "Boxes": item?.isBox ? item?.box : 0,
                             "name": item.name,
                             "id": new Date().getTime(),
+                            "actualPrice": item?.actualPrice
                         },
 
 

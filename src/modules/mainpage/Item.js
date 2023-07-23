@@ -63,46 +63,49 @@ const Item = ({ navigation }) => {
   }
   const increaseQty = (item, index) => {
     if (item?.Boxes > 0) {
-
+      const additionalPrice = Number((item?.actualPrice * 12))
+      const previousPrice = Number(item?.Price);
+      const sum = additionalPrice + previousPrice;
+      const formattedSum = sum.toFixed(2);
+      item.Boxes = item?.Boxes + 1
+      item.Price = formattedSum
+      const orderArray = [...orderHistory]
+      orderArray?.splice(index, 1, item)
+      setOrderHistory(orderArray)
     } else {
-
+      const additionalPrice = Number(item?.actualPrice)
+      const previousPrice = Number(item?.Price);
+      const sum = additionalPrice + previousPrice;
+      const formattedSum = sum.toFixed(2);
+      item.Pieces = item?.Pieces + 1
+      item.Price = formattedSum
+      const orderArray = [...orderHistory]
+      orderArray?.splice(index, 1, item)
+      setOrderHistory(orderArray)
     }
-    console.log("🚀item:", item)
-    console.log("index:", index)
-    // if (item.isBox) {
-    //   const updatedItem = {
-    //     ...item, box: item?.box + 1,
-    //   };
-    //   const increasePrice = { ...updatedItem, price: Number(updatedItem?.box * updatedItem.actualPrice).toFixed(2) }
-    //   setitem(increasePrice)
-    // } else {
-    //   const updatedItem = {
-    //     ...item, packet: item?.packet + 1,
-    //   };
-    //   const increasePrice = { ...updatedItem, price: Number(updatedItem?.packet * updatedItem.actualPrice).toFixed(2) }
-    //   setitem(increasePrice)
-    // }
-
   }
-  const decreaseQty = () => {
-    // if (item.isBox) {
-    //   if (item?.box > 1) {
-    //     const updatedItem = {
-    //       ...item, box: item?.box - 1,
-    //     };
-    //     const increasePrice = { ...updatedItem, price: Number(updatedItem?.price - updatedItem.actualPrice).toFixed(2) }
-    //     setitem(increasePrice)
-    //   }
-    // } else {
-    //   if (item?.packet > 1) {
-    //     const updatedItem = {
-    //       ...item, packet: item?.packet - 1,
-    //     };
-    //     const increasePrice = { ...updatedItem, price: Number(updatedItem?.price - updatedItem.actualPrice).toFixed(2) }
-    //     setitem(increasePrice)
-    //   }
-    // }
-
+  const decreaseQty = (item, index) => {
+    if (item?.Boxes > 1 && item?.Pieces === 0) {
+      const subtractPrice = Number((item?.actualPrice * 12))
+      const previousPrice = Number(item?.Price);
+      const sum = previousPrice - subtractPrice;
+      const formattedSub = sum.toFixed(2);
+      item.Boxes = item?.Boxes - 1
+      item.Price = formattedSub
+      const orderArray = [...orderHistory]
+      orderArray?.splice(index, 1, item)
+      setOrderHistory(orderArray)
+    } else if (item?.Pieces > 1 && item?.Boxes === 0) {
+      const subtractPrice = Number(item?.actualPrice)
+      const previousPrice = Number(item?.Price);
+      const sum = previousPrice - subtractPrice;
+      const formattedSub = sum.toFixed(2);
+      item.Pieces = item?.Pieces - 1
+      item.Price = formattedSub
+      const orderArray = [...orderHistory]
+      orderArray?.splice(index, 1, item)
+      setOrderHistory(orderArray)
+    }
   }
   const CartCard = ({ item, index }) => {
     return (
@@ -149,7 +152,7 @@ const Item = ({ navigation }) => {
                     <AntD name="plus" size={28} color={'blue'} />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => {
-
+                    decreaseQty(item, index)
                   }}>
                     <AntD name="minus" size={28} color={'blue'} />
                   </TouchableOpacity>
@@ -166,41 +169,31 @@ const Item = ({ navigation }) => {
   const confirmOrder = async () => {
     setLoader(true)
     try {
-      let orderArray = await AsyncStorage.getItem('OrderArray')
-      if (orderArray) {
-        orderArray = JSON.parse(orderArray)
-        const getDetailsArray = orderArray?.map(({ details }) => {
-          return details
-        })
-        const combinedArray = [].concat(...getDetailsArray);
-        if (combinedArray.length > 0) {
-          let DealCustID = await AsyncStorage.getItem('DealCustID');
-          let name = await AsyncStorage.getItem('name');
-          if (DealCustID) {
-            if (name) {
-              name = JSON.parse(name)
-              DealCustID = JSON.parse(DealCustID)
-              let allOrder = []
-              let obj = { Date: new Date().toDateString(), "DealCustID": DealCustID, UserID: 1, "details": combinedArray, type: "add_new", name }
-              let arrayString = await AsyncStorage.getItem('postArray');
-              if (arrayString) {
-                arrayString = JSON.parse(arrayString)
-                allOrder = arrayString
-              }
-              allOrder.push(obj)
-              obj = JSON.stringify(allOrder)
-              await AsyncStorage.setItem('postArray', obj);
-              await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
-              await AsyncStorage.setItem('DealCustID', '')
-              navigation.navigate('Home')
-              dispatch(setLoad())
-            }
-
-
+      let DealCustID = await AsyncStorage.getItem('DealCustID');
+      let name = await AsyncStorage.getItem('name');
+      if (DealCustID) {
+        if (name) {
+          name = JSON.parse(name)
+          DealCustID = JSON.parse(DealCustID)
+          let allOrder = []
+          let obj = { Date: new Date().toDateString(), "DealCustID": DealCustID, UserID: 1, "details": orderHistory, type: "add_new", name }
+          let arrayString = await AsyncStorage.getItem('postArray');
+          if (arrayString) {
+            arrayString = JSON.parse(arrayString)
+            allOrder = arrayString
           }
-          setLoader(false)
+          allOrder.push(obj)
+          obj = JSON.stringify(allOrder)
+          await AsyncStorage.setItem('postArray', obj);
+          await AsyncStorage.setItem('OrderArray', JSON.stringify([]))
+          await AsyncStorage.setItem('DealCustID', '')
+          navigation.navigate('Home')
+          dispatch(setLoad())
         }
+
+
       }
+      setLoader(false)
 
     } catch (error) {
       setLoader(false)
